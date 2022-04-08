@@ -1,0 +1,2 @@
+2021-08-04 14:48:31,918	File "basler_camera.py",line 86	INFO: init cameras
+2021-08-04 14:48:31,918	File "basler_camera.py",line 103	INFO: 初始化0个相机成功

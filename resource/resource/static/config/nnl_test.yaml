@@ -1,0 +1,165 @@
+# 工控机处需要的
+use_light_trigger: true    # 是否使用光源的光电控制所有开关触发
+light:
+  use_light: false
+  bind_ip: "192.168.2.112"   # flask绑定IP
+  bind_port: 8025            # flask绑定端口
+  ip: "192.168.2.88"        # KND的IP
+  DI: 3                     # KND的输入口
+snap:
+  # 读取西门子的plc转速
+  ip: "10.15.76.200"
+  slot: 3
+  rack: 0
+  dbnumber: 4
+  start: 4
+  amount: 4
+  unpack_code: ">f"
+  pack_code: ">f"
+  bind_ip: "192.168.2.112"
+  bind_port: 8088
+
+image:
+#  南铝是4096*4096 分两场 4096*2048*2
+  width: 4096
+  height: 2048
+
+workshop_cs:
+  # 操作工用的工作站客户端 Csharp
+  bind_ip: 192.168.2.112
+  bind_port: 12346
+  send_prefix: "02"  # 图像加的前缀
+
+# 采集端算法
+border_ratio: 0 # 边缘处切边，若为0.code 则两边各减少10%
+edge_root: "D:\\edge_data"
+save_edge_source: false
+
+
+#springboot
+sp01:
+  server_url: "http://192.168.2.112:8082"
+
+sp02:
+  server_url: "http://192.168.2.112:8082"
+
+
+defect_type:
+  0: "划伤"
+  1: "烂头"
+  2: "裂纹"
+  3: "耳子"
+  4: "结疤"
+  5: "压痕"
+  6: "疑似裂纹"
+
+# help
+help:
+  bind_ip: "0.0.0.0"
+  bind_port: 8008
+  use_d: true # 是否使用明暗场双切
+  defect_share_root: D:\\data\\d
+  defect_share_url: "192.168.2.112:8083/d"
+  #grade
+  grade:
+    grade_defect_rule_path: ""
+    grade_batch_rule_path: ""
+  #transfer 转移过程图像处理
+  transfer:
+    export_root: D:\\data\export
+    watermark_path: D:\\data\url\watermark.png # 水印的路径
+    alpha: 0.code                     # 加水印的透明度
+    epsilon: 0.code                    # 对抗噪声的加的比例
+
+
+# 主服务器
+gkj01:
+  #  报警
+  lc_meta: "nnl.up"
+  alert_url: "http://124.71.227.6:8095/wang/alert"
+  send_out: true # 报警信息是否上报云端
+
+  # 相机
+  camera_group:
+    # flask 需要的信息
+    bind_ip: "192.168.2.112"
+    bind_port: 8007
+    # 相机组的基本信息
+    begin_id: 0
+    mode: "nnl_save_basler"  # tcp_visual,tcp_basler,save_basler,nnl_save_basler,nnl_visual_save_basler
+
+    TCPSender: # TCP发送的设置
+      name: "gkj02"
+      bind_ip: "192.168.90.51"
+      bind_port_begin: 9000
+      thread_num: 16
+      num_to_cache: 2000 # queue的最大队列长度
+      num_to_send: 16  # 一次发送的最大图片数
+      buffer_size: 10485760 # 10*1024*1024分组buffer的最大buffer包的大小
+      block: false # queue放入的阻塞参数，false为非阻塞
+      thread_sleep_ms: 50 # 线程休息的ms
+
+    save_root: "D:\\data\\i"   # 不用保存到本地的话不用加的
+    send_to_client: true       # 是否发给前端客户端加载图像
+    share_url: "192.168.2.112:8083"           # 共享文件夹前缀 代替D盘
+
+    # Basler相机实体化时候需要的信息
+    camera_ip_list:
+      - "192.168.8.121"
+      - "192.168.8.122"
+      - "192.168.8.123"
+      - "192.168.8.124"
+    camera_config_list:
+      - D:\data\config\device\下表面_192.168.8.121_A4D768G0.5.pfs
+      - D:\data\config\device\下表面_192.168.8.122_A4D512G0.5.pfs
+      - D:\data\config\device\下表面_192.168.8.123_A4D2047G0.5.pfs
+      - D:\data\config\device\下表面_192.168.8.124_A4D768G0.5.pfs
+    visual:
+      visual_img_root: "E:\\data_i" #如果是用虚拟相机，这个是虚拟图片的原始地址
+      cycle_fps: 79 # 每秒多少张图像
+
+
+gkj02:
+#  报警
+  lc_meta: "nnl.down"
+  alert_url: "http://124.71.227.6:8095/wang/alert"
+  send_out: true # 报警信息是否上报云端
+
+# 相机
+  camera_group:
+    # flask 需要的信息
+    bind_ip: "192.168.2.113"
+    bind_port: 8007
+    # 相机组的基本信息
+    begin_id: 4
+    mode: "nnl_save_basler"  # tcp_visual,tcp_basler,save_basler,nnl_save_basler
+
+    TCPSender:  # TCP发送的设置
+      name: "gkj01"
+      bind_ip: "192.168.90.50"
+      bind_port_begin: 9000
+      thread_num: 16
+      num_to_cache: 2000 # queue的最大队列长度
+      num_to_send: 16  # 一次发送的最大图片数
+      buffer_size: 10485760 # 10*1024*1024分组buffer的最大buffer包的大小
+      block: false # queue放入的阻塞参数，false为非阻塞
+      thread_sleep_ms: 50 # 线程休息的ms
+
+    save_root: "D:\\data\\i"   # 不用保存到本地的话不用加的
+    send_to_client: false       # 是否发给前端客户端加载图像
+    share_url: "192.168.2.113:8083"           # 共享文件夹前缀 代替D盘
+
+    # Basler相机实体化时候需要的信息
+    camera_ip_list:
+      - "192.168.8.112"
+      - "192.168.8.111"
+      - "192.168.8.113"
+      - "192.168.8.114"
+    camera_config_list:
+      - D:\data\config\device\上表面_192.168.8.112_A4D256G0.5.pfs
+      - D:\data\config\device\上表面_192.168.8.111_A4D256G0.5.pfs
+      - D:\data\config\device\上表面_192.168.8.113_A4D256G0.5.pfs
+      - D:\data\config\device\上表面_192.168.8.114_A4D256G0.5.pfs
+    visual:
+      visual_img_root: "E:\\data_i" #如果是用虚拟相机，这个是虚拟图片的原始地址
+      cycle_fps: 79 # 每秒多少张图像
